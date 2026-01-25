@@ -6,12 +6,17 @@ import time
 # ==================================================
 # ⚙️ 設定セクション
 # ==================================================
-Q_PARAM = 3
+Q_PARAM = 2
 TARGET_R = 32
-MAP_TYPES_TO_RUN = ["fix_origin", "spatial_avg", "spatial_map"]
+MAP_TYPES_TO_RUN = [
+    "fix_origin",
+    "spatial_avg",
+    "spatial_map",
+]  # 1:2.05s, 11.62s, 11.47s 2:2.32s, 12.08s, 11.44s 3:2.72s, 15.52s, 15.10s
 BC_SETTINGS = [True]
-INPUT_FOLDER = f"potts_q{Q_PARAM}_critical_data_opt"
-OUTPUT_PREFIX = f"maps_POTTS_q{Q_PARAM}_R{TARGET_R}_critical"
+INPUT_FOLDER = f"potts_q{Q_PARAM}_data_opt"
+OUTPUT_PREFIX = f"maps_POTTS_q{Q_PARAM}_R{TARGET_R}"
+
 
 # ベクトル生成設定
 USE_RAW_PBC_DIST = True

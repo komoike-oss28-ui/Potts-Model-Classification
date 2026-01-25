@@ -6,14 +6,18 @@ import matplotlib.pyplot as plt
 from tensorflow.keras import layers, models, regularizers, callbacks
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+import tensorflow as tf
+import random
+
+
 
 # ==================================================
 # ⚙️ 設定: フォルダパスとパラメータ
 # ==================================================
 # 学習用: q=2 (Ising)
-TRAIN_FOLDER_NAME = "maps_POTTS_q2_R32_PBC_fix_origin_NoStd/r_032.0000"
+TRAIN_FOLDER_NAME = "maps_POTTS_q2_R32_PBC_spatial_avg_NoStd/r_032.0000"
 # テスト用: q=3 (Potts)
-TEST_FOLDER_NAME = "maps_POTTS_q3_R32_critical_PBC_fix_origin_NoStd/r_032.0000"
+TEST_FOLDER_NAME = "maps_POTTS_q3_R32_PBC_spatial_avg_NoStd/r_032.0000"
 
 # システムサイズ
 L = 64
@@ -315,7 +319,7 @@ if __name__ == "__main__":
         return "Unknown_Config"
 
     simple_config_name = extract_simplified_config(TRAIN_FOLDER_NAME)
-    save_filename = f"Transfer_Result_{simple_config_name}_critical.png"
+    save_filename = f"Result_{simple_config_name}2.png"
 
     print(f"📌 Config Label: {simple_config_name}")
     print(f"💾 Output filename: {save_filename}")
@@ -330,7 +334,7 @@ if __name__ == "__main__":
     prob_high_cnn = 1.0 - prob_low_cnn
 
     # 描画範囲
-    T_MIN, T_MAX = 0.94, 1.13
+    T_MIN, T_MAX = 0.5, 1.8
     tc_q2 = 1.0 / np.log(1 + np.sqrt(2))  # Ising (q=2) ≈ 1.13
     tc_q3 = 1.0 / np.log(1 + np.sqrt(3))  # Potts (q=3) ≈ 0.99
 
@@ -465,3 +469,58 @@ if __name__ == "__main__":
     print(f"   FCN: {avg_fcn[idx_closest]:.3f} ± {std_fcn[idx_closest]:.3f}")
     print(f"   CNN: {avg_cnn[idx_closest]:.3f} ± {std_cnn[idx_closest]:.3f}")
     print("=" * 70)
+    
+# ==========================================
+# 💾 実験結果をテキストファイルに保存
+# ==========================================
+output_txt_filename = f"Result_{simple_config_name}_data.txt"
+
+with open(output_txt_filename, 'w', encoding='utf-8') as f:
+    # ヘッダー情報
+    f.write("=" * 70 + "\n")
+    f.write("実験結果データ: Transfer Learning (q=2 → q=3)\n")
+    f.write("=" * 70 + "\n")
+    f.write(f"Configuration: {simple_config_name}\n")
+    f.write(f"Training data: {TRAIN_FOLDER_NAME}\n")
+    f.write(f"Test data: {TEST_FOLDER_NAME}\n")
+    f.write(f"Ising Tc (q=2): {tc_q2:.4f}\n")
+    f.write(f"Potts Tc (q=3): {tc_q3:.4f}\n")
+    f.write(f"Epochs: {EPOCHS}\n")
+    f.write(f"Batch size: {BATCH_SIZE}\n")
+    f.write("\n")
+    
+    # モデル性能
+    f.write("=" * 70 + "\n")
+    f.write("モデル性能\n")
+    f.write("=" * 70 + "\n")
+    f.write(f"FCN final training accuracy: {fcn_final_acc:.4f}\n")
+    f.write(f"CNN final training accuracy: {cnn_final_acc:.4f}\n")
+    f.write(f"\nFCN predictions near Potts Tc ({tc_q3:.2f}): {avg_fcn[idx_closest]:.3f} ± {std_fcn[idx_closest]:.3f}\n")
+    f.write(f"CNN predictions near Potts Tc ({tc_q3:.2f}): {avg_cnn[idx_closest]:.3f} ± {std_cnn[idx_closest]:.3f}\n")
+    f.write("\n")
+    
+    # 温度ごとの予測結果（表形式）
+    f.write("=" * 70 + "\n")
+    f.write("温度ごとの予測結果\n")
+    f.write("=" * 70 + "\n")
+    f.write("Temperature\tBeta\tFCN_Prob_Ordered\tFCN_Std\tCNN_Prob_Ordered\tCNN_Std\tFCN_Prob_Disordered\tCNN_Prob_Disordered\n")
+    f.write("-" * 140 + "\n")
+    
+    for i, beta in enumerate(sorted_betas):
+        temp = temps[i]
+        f.write(f"{temp:.4f}\t{beta:.4f}\t{avg_fcn[i]:.6f}\t{std_fcn[i]:.6f}\t{avg_cnn[i]:.6f}\t{std_cnn[i]:.6f}\t{prob_high_fcn[i]:.6f}\t{prob_high_cnn[i]:.6f}\n")
+    
+    f.write("\n")
+    f.write("=" * 70 + "\n")
+    f.write("データ説明:\n")
+    f.write("- Temperature: 温度 T = 1/β\n")
+    f.write("- Beta: 逆温度 β\n")
+    f.write("- FCN_Prob_Ordered: FCNモデルの秩序相確率（低温相）\n")
+    f.write("- FCN_Std: FCNモデルの標準偏差\n")
+    f.write("- CNN_Prob_Ordered: CNNモデルの秩序相確率（低温相）\n")
+    f.write("- CNN_Std: CNNモデルの標準偏差\n")
+    f.write("- FCN_Prob_Disordered: FCNモデルの無秩序相確率（高温相）\n")
+    f.write("- CNN_Prob_Disordered: CNNモデルの無秩序相確率（高温相）\n")
+    f.write("=" * 70 + "\n")
+
+print(f"✅ Data saved to text file: {output_txt_filename}")

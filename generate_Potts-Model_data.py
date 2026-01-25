@@ -7,17 +7,18 @@ import time
 # ==================================================
 L = 64
 J = 1.0
-q = 3  # Pottsモデルの状態数
+q = 2  # Pottsモデルの状態数
 # beta_values = list(np.linspace(beta_c * 0.95, beta_c * 1.05, 15)) :critical
 
 # list(np.linspace(beta_low, beta_c * 0.8, 4 or 7)) :高温相
-# + list(np.linspace(beta_c * 0.9, beta_c * 1.1, 6)) テスト時使用
-# list(np.linspace(beta_c * 1.2, beta_high, 4 or 7)) :低温相
+# +list(np.linspace(beta_c * 0.9, beta_c * 1.1, 6)) テスト時使用
+# +list(np.linspace(beta_c * 1.2, beta_high, 4 or 7)) :低温相
 
-equilibration_mcs_ml = 7000
+total_mcs_ml = 15000
+equilibration_mcs_ml = 8000
 num_configs_per_temp = 200
 
-output_ml_folder = f"potts_q{q}_critical_data_opt"
+output_ml_folder = f"potts_q{q}_data_opt"
 os.makedirs(output_ml_folder, exist_ok=True)
 
 # 臨界温度 T_c = 1 / ln(1 + sqrt(q))
@@ -26,9 +27,12 @@ T_c = 1.0 / np.log(val)
 beta_c = 1.0 / T_c  # 0.44
 
 # 温度設定 (臨界点周辺)
-beta_low = beta_c * 0.4
-beta_high = beta_c * 1.6
-beta_values = list(np.linspace(beta_c * 0.95, beta_c * 1.05, 15))
+beta_low = beta_c * 0.3
+beta_high = beta_c * 1.7
+beta_values = (
+ list(np.linspace(beta_low, beta_c * 0.7, 7))+
+ list(np.linspace(beta_c * 1.3, beta_high, 7))
+)
 
 print(f"Potts q={q}, Tc={T_c:.4f}, beta_c={beta_c:.4f}")
 
