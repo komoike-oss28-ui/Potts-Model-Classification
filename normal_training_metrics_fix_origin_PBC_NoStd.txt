@@ -1,3 +1,0 @@
-Model	Avg_Epoch_Time_s	Total_Epoch_Time_s	Total_Training_Time_s	Test_Accuracy
-FCN	0.2315	1.3890	1.4040	0.9867
-CNN	1.1179	8.9434	8.9607	0.9912
